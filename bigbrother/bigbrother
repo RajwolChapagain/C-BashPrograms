@@ -1,0 +1,54 @@
+#!/usr/bin/env bash
+
+printf "\033[33m%-20s%-20s%-20s%-20s%-20s\033[0m\n" "USERID" "NAME" "PHONE" "TTY" "WHAT"
+
+user_list=""
+
+
+if (test $# -eq 0) then
+	#If no args, then grab all active users using who
+	for user in $(who | tr -s " " | cut -d " " -f 1)
+	do
+		user_list+=$user
+		user_list+=" "
+	done
+elif [[ $1 == "all" ]]; then
+	#If the first argument is all, then grab all classmates from the passwd file
+	for user in $(cat /etc/passwd | grep BASHINGBEARS | cut -d ':' -f 1)
+	do
+		user_list+=$user
+		user_list+=" "
+	done
+else
+	#If the first argument is not all and there are non-zero arguments
+	for user in $*
+do
+		user_list+=$user
+		user_list+=" "
+	done
+fi
+
+for user in $user_list
+do
+	printf "%-20s" $user
+
+	# Print name from password file
+	printf "%-20s" "$(cat /etc/passwd | grep $user | cut -d ':' -f 5 | cut -d ',' -f 1)"
+
+	# Print number from password file
+	printf "%-20s" "$(cat /etc/passwd | grep $user | cut -d ':' -f 5 | cut -d ',' -f 3)"
+
+	# Check if the user is active using finger
+	finger | grep $user &> /dev/null
+	if (test $? -eq 0) then
+		# Print terminal using who
+		printf "%-20s" "$(who | grep $user | tr -s " " | cut -d " " -f2)"
+
+		# Print activity using w
+		printf "%-20s\n" "$(w | grep $user| tr -s " " | cut -d " " -f 8)"
+	else
+		# Print terminal using who
+		printf "%-20s%-20s\n" "NOT ON" "-"
+	fi
+done
+
