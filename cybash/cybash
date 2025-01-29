@@ -1,0 +1,56 @@
+#!/usr/bin/env bash
+
+while true; do
+	echo -n "Cybash>"
+	read input
+
+	if [[ $input == "cybye" ]]; then
+		break
+	elif [[ $input == "cystuff" ]]; then
+		ls
+	elif [[ $input == "cyguy" ]]; then
+		bash
+	elif [[ $input == "cycrazy" ]]; then
+		printf "\033[31m%s\033[0m %s \033[33m%s\033[0m in\n" "*** WARNING ***:"  "Deleting all user files in" "$HOME"
+		echo 5
+		sleep 0.8
+		echo 4
+		sleep 0.8
+		echo 3
+		sleep 0.8
+		echo 2
+		sleep 0.8
+		echo 1
+		sleep 0.8
+		echo 0
+		sleep 0.8
+		echo -e "\033[32mPOOF\033[0m"
+	elif [[ $input == "cyhelp" ]]; then
+		echo List of available commands:
+		echo -e "cyshow [filename]\t- Opens [filename] for viewing in a scrollable format"
+		echo -e "cycall [userid]\t\t- Displays the full name and office phone number of user with id [userid]"
+		echo -e "cylist\t\t\t- Displays full names of currently logged in users"
+		echo -e "cystuff\t\t\t- Displays the contents of the current folder"
+		echo -e "cyhelp\t\t\t- Displays this help messsage"
+		echo -e "cycrazy\t\t\t- Does something crazy"
+		echo -e "cyvi [filename]\t\t- Opens [filename] for editing in vim"
+		echo -e "bigbrother [args]\t- Runs the bigbrother script with provided arguments if any"
+		echo -e "cybye\t\t\t- Exits the Cybash shell"
+	elif [[ $input == "cylist" ]]; then
+		for user in $(who | tr -s " " | cut -d " " -f 1); do
+			echo $(grep $user /etc/passwd | cut -d ":" -f 5 | cut -d "," -f 1)
+		done
+	else # The input contains two or more spaces
+		command=$(echo $input | cut -d " " -f 1)
+		if [[ $command == "cyvi" ]]; then
+			vim $(echo $input | cut -d " " -f 2)
+		elif [[ $command == "cycall" ]]; then
+			userid=$(echo $input | cut -d " " -f 2)
+			echo -e "Name:\t$(grep $userid /etc/passwd | cut -d ":" -f 5 | cut -d "," -f 1) | Office Phone:\t$(grep $userid /etc/passwd | cut -d ":" -f 5 | cut -d "," -f 3)"
+		elif [[ $command == "cyshow" ]]; then
+			less $(echo $input | cut -d " " -f 2)
+		elif [[ $command == "bigbrother" ]]; then
+			bash ../bigbrother/$input
+		fi
+	fi
+done
