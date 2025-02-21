@@ -18,16 +18,20 @@ int main(int argc, char* argv[]) {
 		return 0;
 	}
 
+	char c = 'A';
+
 	int i = 0;
 	for (; i < n; i++) {
-		int j = 0;
-		for (; j < n; j++) {
-			printf("%c: %d\n", 'A' + i, getpid());
-		}
-
+		c = 'A' + i;
+		if (i == n - 1) break;
 		if (fork() != 0) {
 			break;
 		}
+	}
+
+	int j = 0;
+	for (; j < n; j++) {
+		printf("%c: %d\n", c, getpid());
 	}
 
 	return 0;
