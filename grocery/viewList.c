@@ -30,5 +30,9 @@ int main() {
 		printf("%2d: %20s| %8d| %30s|\n", shmaddr->id, shmaddr->name, shmaddr->favNum, shmaddr->favFood);
 		shmaddr++;
 	}
+
+	// Detach from shared memory
+	shmdt(shmaddr);
+
 	return 0;
 }
