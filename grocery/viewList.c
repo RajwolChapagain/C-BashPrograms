@@ -1,4 +1,5 @@
 // Name: 		Rajwol Chapagain
+// Class:		CSC 460
 // Date: 		02/28/25
 // Assignment: 	Grocery View - A program that attaches to a pre-created shared memory and displays its contents in a tabular form
 

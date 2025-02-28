@@ -1,4 +1,5 @@
 // Name: 		Rajwol Chapagain
+// Class:		CSC 460
 // Date: 		02/28/25
 // Assignment: 	Grocery Update Name - A program that takes in a name from the command line and writes it to the appropriate place in shared memory
 

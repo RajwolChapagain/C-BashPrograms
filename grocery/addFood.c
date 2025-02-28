@@ -1,4 +1,5 @@
 // Name: 		Rajwol Chapagain
+// Class:		CSC 460
 // Date: 		02/28/25
 // Assignment: 	Grocery Add Food - A program that takes in a food item from the command line and writes it to the appropriate place in shared memory
 
