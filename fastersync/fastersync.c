@@ -43,14 +43,11 @@ int main(int argc, char* argv[]) {
 	}
 
 	int j = 0;
-	char turn;
 	for (; j < n; j++) {
-		do {
-			turn = *shmaddr;
-		} while (turn != c);
+		while (*shmaddr != c);
 
 		printf("%c:%d\n", c, getpid());
-		char new_turn = ++turn;
+		char new_turn = ++(*shmaddr);
 		new_turn -= 'A';
 		new_turn %= n;
 		new_turn += 'A';
