@@ -45,13 +45,8 @@ int main(int argc, char* argv[]) {
 	int j = 0;
 	for (; j < n; j++) {
 		while (*shmaddr != c);
-
 		printf("%c:%d\n", c, getpid());
-		char new_turn = ++(*shmaddr);
-		new_turn -= 'A';
-		new_turn %= n;
-		new_turn += 'A';
-		*shmaddr = new_turn;
+		*shmaddr = 'A' + ((*shmaddr + 1 - 'A') % n);
 	}
 
 	if (getpid() == original_pid)
