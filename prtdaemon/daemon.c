@@ -1,4 +1,10 @@
 #include <stdio.h>
+#include <string.h>
+
+struct Job {
+	int owner_id;
+	char filename[20];
+};
 
 int main(int argc, char* argv[]) {
 	if (argc < 2) {
