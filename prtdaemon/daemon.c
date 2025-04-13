@@ -34,12 +34,36 @@ int main(int argc, char* argv[]) {
 	semctl(full_id, 0, SETVAL, 0);
 	semctl(mutex, 0, SETVAL, 1);
 
+	// Save info to file
+	FILE* fp;
+	fp = fopen("sync_info.txt", "w");
+	fprintf(fp, "%d\n%d\n%d\n%d\n%d\n", buffer_size, shm_id, empty_id, full_id, mutex);
+	fclose(fp);
 
 	// Clean up
 	shmctl(shm_id, IPC_RMID, NULL);
 	semctl(empty_id, 0, IPC_RMID, 0);
 	semctl(full_id, 0, IPC_RMID, 0);
 	semctl(mutex, 0, IPC_RMID, 0);
+	remove("sync_info.txt");
 
 	return 0;
+}
+
+p(int s,int sem_id) {
+        struct sembuf sops;
+
+        sops.sem_num = s;
+        sops.sem_op = -1;
+        sops.sem_flg = 0;
+        if((semop(sem_id, &sops, 1)) == -1) printf("%s", "'P' error\n");
+}
+
+v(int s, int sem_id) {
+        struct sembuf sops;
+
+        sops.sem_num = s;
+        sops.sem_op = 1;
+        sops.sem_flg = 0;
+        if((semop(sem_id, &sops, 1)) == -1) printf("%s","'V' error\n");
 }
