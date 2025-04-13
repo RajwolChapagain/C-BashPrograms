@@ -52,6 +52,7 @@ int main(int argc, char* argv[]) {
 
 	// Clean up
 	shmctl(shm_id, IPC_RMID, NULL);
+	shmctl(stop_id, IPC_RMID, NULL);
 	semctl(empty_id, 0, IPC_RMID, 0);
 	semctl(full_id, 0, IPC_RMID, 0);
 	semctl(mutex, 0, IPC_RMID, 0);
