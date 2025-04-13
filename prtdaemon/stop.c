@@ -13,16 +13,19 @@ int main() {
 	// empty_id (int) \n (char)
 	// full_id (int) \n (char)
 	// mutex (int) \n (char)
-	fseek(fp, (sizeof(int) + sizeof(char))* 2, SEEK_SET);
 	
 	int stop_id;
-	fscanf(fp, "%d", &stop_id);
+	int i;
+	for (i = 0; i < 3; i++) // Since stop_id is on the third line
+		fscanf(fp, "%d", &stop_id);
 
 	// Rewind fp to point at the beginning of the file
 	rewind(fp);
-	fseek(fp, (sizeof(int) + sizeof(char))* 5, SEEK_SET);
 	int full_id;
-	fscanf(fp, "%d", &full_id);
+	for (i = 0; i < 5; i++) // Since full_id is on the fifth line
+		fscanf(fp, "%d", &full_id);
+
+	fclose(fp);
 
 	// Wake printer up in case it's blocked
 	v(0, full_id);
