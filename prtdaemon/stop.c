@@ -7,6 +7,11 @@
 int main() {
 	FILE* fp;
 	fp = fopen("sync_info.txt", "r");
+
+	if (!fp) {
+		printf("Error: sync_info.txt does not exist in the current directory. Did you forget to run the print daemon?\n");
+		return 1;
+	}
 	
 	// sync_info.txt is expected to be formatted as follows:
 	// buffer_size (int) \n (char)
