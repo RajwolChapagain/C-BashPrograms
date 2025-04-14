@@ -50,10 +50,19 @@ int main(int argc, char* argv[]) {
 	int *stop = (int *) shmat(stop_id, NULL, SHM_RND);
 	*stop = 0;
 
+	struct Job* buffer_addr = (struct Job*) shmat(shm_id, NULL, SHM_RND);
 	// Print loop
 	while (!*stop) {
-		printf("Printing\n");
-		sleep(1);
+		p(0, full_id);
+		if (*stop) break; // stop.c could've woken it up
+		p(0, mutex);
+		printf("Printing %d's file...\n", buffer_addr[front].owner_id);
+		char command[512];
+		sprintf(command, "cat %s", buffer_addr[front].filename);
+		system(command);
+		front = (front + 1) % buffer_size;
+		v(0, mutex);
+		v(0, empty_id);
 	}
 
 	// Clean up
