@@ -55,6 +55,8 @@ int main() {
 		v(0, full_id);
 	}
 
+	//Remove quote file when done
+	remove(print_job.filename);
 	printf("User %d is logging off\n", pid);
 
 	return 0;
