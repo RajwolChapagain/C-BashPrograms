@@ -9,6 +9,15 @@ struct Job {
 };
 
 int main() {
+	// Read shared resource info from file created by daemon
+	FILE* fp;
+	fp = fopen("sync_info.txt", "r");
+
+	if (!fp) {
+		printf("Error: Could not find sync_info.txt in the current directory. Did you forget to run the print daemon first?\n");
+		return -1;
+	}
+
 	int pid = getpid();
 	char command[512];
 
@@ -20,10 +29,6 @@ int main() {
 	struct Job print_job;
 	print_job.owner_id = pid;
 	sprintf(print_job.filename, "quotefile_%d", pid);
-
-	// Read shared resource info from file created by daemon
-	FILE* fp;
-	fp = fopen("sync_info.txt", "r");
 
 	int buffer_size, buffer_id, _stop_id, empty_id, full_id, mutex, rear_id;
 
