@@ -13,13 +13,13 @@ int main() {
 	char command[512];
 
 	// Download and save unique quote in a unique file
-	sprintf(command, "curl -s http://api.quotable.io/random | cut -d ':' -f 3 | cut -d '\"' -f 2 > %d", pid);
+	sprintf(command, "curl -s http://api.quotable.io/random | cut -d ':' -f 3 | cut -d '\"' -f 2 > quotefile_%d", pid);
 	system(command);
 
 	// Create a struct containing file metadata
 	struct Job print_job;
 	print_job.owner_id = pid;
-	sprintf(print_job.filename, "%d", pid);
+	sprintf(print_job.filename, "quotefile_%d", pid);
 
 	// Read shared resource info from file created by daemon
 	FILE* fp;
@@ -45,7 +45,7 @@ int main() {
 		sleep_duration = (rand() % 4) + 2;
 		printf("User %d is working for %d seconds\n", pid, sleep_duration);
 		sleep(sleep_duration);
-		printf("User %d is printing %d\n", pid, pid);
+		printf("User %d is printing %s\n", pid, print_job.filename);
 		p(0, empty_id);
 		p(0, mutex);
 		buffer_addr[*rear_addr].owner_id = print_job.owner_id;
