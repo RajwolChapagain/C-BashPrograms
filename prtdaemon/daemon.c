@@ -9,6 +9,15 @@ struct Job {
 };
 
 int main(int argc, char* argv[]) {
+	FILE* fp;
+	fp = fopen("sync_info.txt", "r");
+
+	if (fp) {
+		printf("Error: sync_info.txt already exists in the current directory. Is another print daemon running?\n");
+		fclose(fp);
+		return -1;
+	}
+
 	if (argc < 2) {
 		printf("Error: Please enter a buffer size from 1-10 as a cmdline argument\n");
 		return -1;
@@ -42,7 +51,6 @@ int main(int argc, char* argv[]) {
 	semctl(mutex, 0, SETVAL, 1);
 
 	// Save info to file
-	FILE* fp;
 	fp = fopen("sync_info.txt", "w");
 	fprintf(fp, "%d\n%d\n%d\n%d\n%d\n%d\n%d\n", buffer_size, shm_id, stop_id, empty_id, full_id, mutex, rear_id);
 	fclose(fp);
