@@ -31,6 +31,11 @@ int main(int argc, char* argv[]) {
 	int full_id = semget(IPC_PRIVATE, 1, 0700);
 	int mutex = semget(IPC_PRIVATE, 1, 0700);
 
+	// Initialize buffer front and rear
+	int front = 0;
+	int* rear_addr = (int*) shmat(rear_id, NULL, SHM_RND);
+	*rear_addr = 0;	
+
 	// Initialize semaphores
 	semctl(empty_id, 0, SETVAL, buffer_size);
 	semctl(full_id, 0, SETVAL, 0);
