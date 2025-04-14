@@ -8,6 +8,14 @@ sleep 1
 ./user &
 ./user &
 ./user &
+sleep 2
+./user &
+./user &
+./user &
+sleep 3
+./user &
+./user &
+./user &
 sleep 10
 ./user &
 ./user &
