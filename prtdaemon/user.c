@@ -1,3 +1,5 @@
+// User code for the print daemon program that simulates a user submitting print jobs
+
 #include <stdio.h>
 #include <string.h>
 #include <sys/shm.h>
@@ -48,6 +50,7 @@ int main() {
 
 	int i, sleep_duration;
 	srand(pid);
+	// Repeatedly submit print jobs
 	for (i = 0; i < 5; i++) {
 		sleep_duration = (rand() % 4) + 2;
 		printf("User %d is working for %d seconds\n", pid, sleep_duration);

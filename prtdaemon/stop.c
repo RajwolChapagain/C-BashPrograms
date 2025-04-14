@@ -1,3 +1,5 @@
+// Stop file for the print daemon program that signals the printer to shut down
+
 #include <stdio.h>
 #include <sys/shm.h>
 #include <sys/sem.h>
