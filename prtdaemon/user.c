@@ -17,8 +17,7 @@ int main() {
 
 	if (!fp) {
 		printf("Error: Could not find sync_info.txt in the current directory. Did you forget to run the print daemon first?\n");
-		fclose(fp);
-		return -1;
+		return 1;
 	}
 
 	int pid = getpid();

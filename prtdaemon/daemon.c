@@ -20,19 +20,19 @@ int main(int argc, char* argv[]) {
 	if (fp) {
 		printf("Error: sync_info.txt already exists in the current directory. Is another print daemon running?\n");
 		fclose(fp);
-		return -1;
+		return 1;
 	}
 
 	if (argc < 2) {
 		printf("Error: Please enter a buffer size from 1-10 as a cmdline argument\n");
-		return -1;
+		return 1;
 	}
 
 	int buffer_size = atoi(argv[1]);
 
 	if (buffer_size < 1 || buffer_size > 10) {
 		printf("Error: Please enter a buffer size from 1-10 as a cmdline argument\n");
-		return -1;
+		return 1;
 	}
 
 	// Get shared memory
