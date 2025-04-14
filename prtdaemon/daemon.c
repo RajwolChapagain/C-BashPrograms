@@ -81,7 +81,7 @@ int main(int argc, char* argv[]) {
 	semctl(full_id, 0, IPC_RMID, 0);
 	semctl(mutex, 0, IPC_RMID, 0);
 	remove("sync_info.txt");
-	system("rm quotefile*");
+	system("rm quotefile* &> /dev/null");
 
 	printf("Printer shutting down.\n");
 	return 0;
