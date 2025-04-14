@@ -24,6 +24,7 @@ int main(int argc, char* argv[]) {
 	// Get shared memory
 	int shm_id = shmget(IPC_PRIVATE, sizeof(struct Job) * buffer_size, 0700);
 	int stop_id = shmget(IPC_PRIVATE, sizeof(int), 0700);
+	int rear_id = shmget(IPC_PRIVATE, sizeof(int), 0700);
 
 	// Get semaphores
 	int empty_id = semget(IPC_PRIVATE, 1, 0700);
@@ -38,7 +39,7 @@ int main(int argc, char* argv[]) {
 	// Save info to file
 	FILE* fp;
 	fp = fopen("sync_info.txt", "w");
-	fprintf(fp, "%d\n%d\n%d\n%d\n%d\n%d\n", buffer_size, shm_id, stop_id, empty_id, full_id, mutex );
+	fprintf(fp, "%d\n%d\n%d\n%d\n%d\n%d\n%d\n", buffer_size, shm_id, stop_id, empty_id, full_id, mutex, rear_id);
 	fclose(fp);
 
 	int *stop = (int *) shmat(stop_id, NULL, SHM_RND);
@@ -53,6 +54,7 @@ int main(int argc, char* argv[]) {
 	// Clean up
 	shmctl(shm_id, IPC_RMID, NULL);
 	shmctl(stop_id, IPC_RMID, NULL);
+	shmctl(rear_id, IPC_RMID, NULL);
 	semctl(empty_id, 0, IPC_RMID, 0);
 	semctl(full_id, 0, IPC_RMID, 0);
 	semctl(mutex, 0, IPC_RMID, 0);
