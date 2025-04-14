@@ -15,6 +15,7 @@ int main() {
 
 	if (!fp) {
 		printf("Error: Could not find sync_info.txt in the current directory. Did you forget to run the print daemon first?\n");
+		fclose(fp);
 		return -1;
 	}
 
@@ -39,6 +40,7 @@ int main() {
 	fscanf(fp, "%d", &full_id);
 	fscanf(fp, "%d", &mutex);
 	fscanf(fp, "%d", &rear_id);
+	fclose(fp);
 
 	// Attach to shared memory
 	struct Job* buffer_addr = (struct Job*) shmat(buffer_id, NULL, SHM_RND);
