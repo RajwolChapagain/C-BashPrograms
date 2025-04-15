@@ -1,4 +1,8 @@
-// Stop file for the print daemon program that signals the printer to shut down
+// Name:		Rajwol Chapagain
+// Class:		CSC 460
+// Assignment:	System Print Daemon - A program that simulates the producer/consumer synchronization problem using a printer shared by a group of users.
+// Date: 		04/14/2025
+// A Stop file for the print daemon program that signals the printer to shut down
 
 #include <stdio.h>
 #include <sys/shm.h>

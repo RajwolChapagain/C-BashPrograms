@@ -1,3 +1,7 @@
+// Name:		Rajwol Chapagain
+// Class:		CSC 460
+// Assignment:	System Print Daemon - A program that simulates the producer/consumer synchronization problem using a printer shared by a group of users.
+// Date: 		04/14/2025
 // User code for the print daemon program that simulates a user submitting print jobs
 
 #include <stdio.h>
