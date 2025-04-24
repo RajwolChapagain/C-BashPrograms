@@ -19,20 +19,34 @@ int main(int argc, char* argv[]) {
 	fp = fopen("sync_info.txt", "r");
 
 	if (fp) {
-		printf("Error: sync_info.txt already exists in the current directory. Is another print daemon running?\n");
+		printf("Error: sync_info.txt already exists in the current directory. Is another consumer running?\n");
 		fclose(fp);
 		return 1;
 	}
 
-	if (argc < 2) {
-		printf("Error: Please enter a buffer size from 1-10 as a cmdline argument\n");
+	if (argc < 4) {
+		printf("Error: Inadequate number of arguments provided.\nPlease enter three command-line arguments in the following order:\n");
+		printf("rows cols buffersize\n");
+		printf("\t where 1 <= rows <= 20, and 1 <= cols <= 50, 1 <= buffersize <= 26\n");
 		return 1;
 	}
 
-	int buffer_size = atoi(argv[1]);
+	int rows = atoi(argv[1]);
+	int cols = atoi(argv[2]);
+	int buffer_size = atoi(argv[3]);
 
-	if (buffer_size < 1 || buffer_size > 10) {
-		printf("Error: Please enter a buffer size from 1-10 as a cmdline argument\n");
+	if (rows < 1 || rows > 20) {
+		printf("Error: Please enter a row size from 1-20\n");
+		return 1;
+	}
+
+	if (cols < 1 || cols > 50) {
+		printf("Error: Please enter a column size from 1-50\n");
+		return 1;
+	}
+
+	if (buffer_size < 1 || buffer_size > 26) {
+		printf("Error: Please enter a buffer size from 1-26\n");
 		return 1;
 	}
 
