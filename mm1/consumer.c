@@ -85,10 +85,10 @@ int main(int argc, char* argv[]) {
 		p(0, full_id);
 		if (*stop) break; // stop.c could've woken it up
 		p(0, mutex);
-		printf("Printing %d's file...\n", buffer_addr[front].owner_id);
-		char command[512];
-		sprintf(command, "cat %s", buffer_addr[front].filename);
-		system(command);
+		//printf("Printing %d's file...\n", buffer_addr[front].owner_id);
+		//char command[512];
+		//sprintf(command, "cat %s", buffer_addr[front].filename);
+		//system(command);
 		front = (front + 1) % buffer_size;
 		v(0, mutex);
 		v(0, empty_id);
@@ -102,9 +102,8 @@ int main(int argc, char* argv[]) {
 	semctl(full_id, 0, IPC_RMID, 0);
 	semctl(mutex, 0, IPC_RMID, 0);
 	remove("sync_info.txt");
-	system("rm quotefile* &> /dev/null");
 
-	printf("Printer shutting down.\n");
+	printf("Consumer shutting down.\n");
 	return 0;
 }
 
