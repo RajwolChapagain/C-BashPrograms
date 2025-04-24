@@ -9,9 +9,10 @@
 #include <sys/shm.h>
 #include <sys/sem.h>
 
-struct Job {
-	int owner_id;
-	char filename[20];
+struct Process {
+	int pid;
+	int size;
+	int time;
 };
 
 int main(int argc, char* argv[]) {
@@ -51,7 +52,7 @@ int main(int argc, char* argv[]) {
 	}
 
 	// Get shared memory
-	int shm_id = shmget(IPC_PRIVATE, sizeof(struct Job) * buffer_size, 0700);
+	int shm_id = shmget(IPC_PRIVATE, sizeof(struct Process) * buffer_size, 0700);
 	int stop_id = shmget(IPC_PRIVATE, sizeof(int), 0700);
 	int rear_id = shmget(IPC_PRIVATE, sizeof(int), 0700);
 
@@ -72,13 +73,13 @@ int main(int argc, char* argv[]) {
 
 	// Save info to file
 	fp = fopen("sync_info.txt", "w");
-	fprintf(fp, "%d\n%d\n%d\n%d\n%d\n%d\n%d\n", buffer_size, shm_id, stop_id, empty_id, full_id, mutex, rear_id);
+	fprintf(fp, "%d\n%d\n%d\n%d\n%d\n%d\n%d\n%d\n%d\n", buffer_size, shm_id, stop_id, empty_id, full_id, mutex, rear_id, rows, cols);
 	fclose(fp);
 
 	int *stop = (int *) shmat(stop_id, NULL, SHM_RND);
 	*stop = 0;
 
-	struct Job* buffer_addr = (struct Job*) shmat(shm_id, NULL, SHM_RND);
+	struct Process* buffer_addr = (struct Process*) shmat(shm_id, NULL, SHM_RND);
 	// Print loop
 	while (!*stop) {
 		p(0, full_id);
