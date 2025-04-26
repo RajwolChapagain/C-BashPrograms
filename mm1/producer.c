@@ -81,6 +81,13 @@ int main(int argc, char* argv[]) {
 	printf("%d is requesting %d blocks of RAM for %d seconds\n", process.pid, size, time);
 	p(0, empty_id);
 	p(0, mutex);
+	int i;
+	for (i = 0; i < buffer_size; i++)
+		if (buffer_addr[i].status != 0 && buffer_addr[i].status != 1)
+			break;
+
+	*rear_addr = i;
+
 	buffer_addr[*rear_addr].pid = process.pid;
 	buffer_addr[*rear_addr].size = process.size;
 	buffer_addr[*rear_addr].time = process.time;
