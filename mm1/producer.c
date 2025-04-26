@@ -10,34 +10,33 @@
 #include <sys/shm.h>
 #include <sys/sem.h>
 
-struct Job {
-	int owner_id;
-	char filename[20];
+struct Process {
+	int pid;
+	int size;
+	int time;
+	int proc_sem_id;
 };
 
-int main() {
-	// Read shared resource info from file created by daemon
+int main(int argc, char* argv[]) {
+	// Read shared resource info from file created by consumer
 	FILE* fp;
 	fp = fopen("sync_info.txt", "r");
 
 	if (!fp) {
-		printf("Error: Could not find sync_info.txt in the current directory. Did you forget to run the print daemon first?\n");
+		printf("Error: Could not find sync_info.txt in the current directory. Did you forget to run the consumer first?\n");
 		return 1;
 	}
 
-	int pid = getpid();
-	char command[512];
+	if (argc < 3) {
+		printf("Error: Inadequate number of arguments provided.\nPlease enter two command-line arguments in the following order:\n");
+		printf("size time\n");
+		return 1;
+	}
 
-	// Download and save unique quote in a unique file
-	sprintf(command, "curl -s http://api.quotable.io/random | cut -d ':' -f 3 | cut -d '\"' -f 2 > quotefile_%d", pid);
-	system(command);
+	int size = atoi(argv[1]);
+	int time = atoi(argv[2]);
 
-	// Create a struct containing file metadata
-	struct Job print_job;
-	print_job.owner_id = pid;
-	sprintf(print_job.filename, "quotefile_%d", pid);
-
-	int buffer_size, buffer_id, stop_id, empty_id, full_id, mutex, rear_id;
+	int buffer_size, buffer_id, stop_id, empty_id, full_id, mutex, rear_id, rows, cols;
 
 	fscanf(fp, "%d", &buffer_size);
 	fscanf(fp, "%d", &buffer_id);
@@ -46,32 +45,53 @@ int main() {
 	fscanf(fp, "%d", &full_id);
 	fscanf(fp, "%d", &mutex);
 	fscanf(fp, "%d", &rear_id);
+	fscanf(fp, "%d", &rows);
+	fscanf(fp, "%d", &cols);
 	fclose(fp);
 
-	// Attach to shared memory
-	struct Job* buffer_addr = (struct Job*) shmat(buffer_id, NULL, SHM_RND);
-	int* rear_addr = (int*) shmat(rear_id, NULL, SHM_RND);
-	int* stop = (int*) shmat(stop_id, NULL, SHM_RND);
-
-	int i, sleep_duration;
-	srand(pid);
-	// Repeatedly submit print jobs
-	for (i = 0; i < 5; i++) {
-		sleep_duration = (rand() % 4) + 2;
-		printf("User %d is working for %d seconds\n", pid, sleep_duration);
-		sleep(sleep_duration);
-		if (*stop) break;
-		printf("User %d is printing %s\n", pid, print_job.filename);
-		p(0, empty_id);
-		p(0, mutex);
-		buffer_addr[*rear_addr].owner_id = print_job.owner_id;
-		strcpy(buffer_addr[*rear_addr].filename, print_job.filename);
-		*rear_addr = (*rear_addr + 1) % buffer_size;
-		v(0, mutex);
-		v(0, full_id);
+	if (size < 1 || size > rows*cols) {
+		printf("Error: Process size must be between 1 and %d\n", rows*cols);
+		return 1;
 	}
 
-	printf("User %d is logging off\n", pid);
+	if (time < 1 || time > 30) {
+		printf("Error: Process time must be between 1 and 30\n");
+		return 1;
+	}
+
+	// Get semaphore used for waiting for execution complete signal
+	int proc_sem_id = semget(IPC_PRIVATE, 1, 0700);
+	semctl(proc_sem_id, 0, SETVAL, 0);
+
+	// Create a struct containing process metadata
+	struct Process process;
+	process.pid = getpid();
+	process.size = size;
+	process.time = time;
+	process.proc_sem_id = proc_sem_id;
+
+	// Attach to shared memory
+	struct Process* buffer_addr = (struct Process*) shmat(buffer_id, NULL, SHM_RND);
+	int* rear_addr = (int*) shmat(rear_id, NULL, SHM_RND);
+
+	printf("%d is requesting %d blocks of RAM for %d seconds\n", process.pid, size, time);
+	p(0, empty_id);
+	p(0, mutex);
+	buffer_addr[*rear_addr].pid = process.pid;
+	buffer_addr[*rear_addr].size = process.size;
+	buffer_addr[*rear_addr].time = process.time;
+	buffer_addr[*rear_addr].proc_sem_id = process.proc_sem_id;
+	*rear_addr = (*rear_addr + 1) % buffer_size;
+	v(0, mutex);
+	v(0, full_id);
+	
+	// Wait for process request to finish execution
+	p(0, proc_sem_id);
+
+	printf("%d finished my request of %d blocks for %d seconds\n", process.pid, size, time);
+
+	// Clean up the waiting semaphore
+	semctl(proc_sem_id, 0, IPC_RMID, 0);
 
 	return 0;
 }

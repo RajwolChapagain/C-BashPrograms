@@ -13,6 +13,7 @@ struct Process {
 	int pid;
 	int size;
 	int time;
+	int proc_sem_id;
 };
 
 int main(int argc, char* argv[]) {
@@ -85,10 +86,13 @@ int main(int argc, char* argv[]) {
 		p(0, full_id);
 		if (*stop) break; // stop.c could've woken it up
 		p(0, mutex);
-		//printf("Printing %d's file...\n", buffer_addr[front].owner_id);
-		//char command[512];
-		//sprintf(command, "cat %s", buffer_addr[front].filename);
-		//system(command);
+		printf("A new process has just requested to be put into memory!\n");
+		printf("PID: %d\n", buffer_addr[front].pid);
+		printf("Size: %d\n", buffer_addr[front].size);
+		printf("Time: %d\n", buffer_addr[front].time);
+		printf("Proc Sem ID: %d\n", buffer_addr[front].proc_sem_id);
+		sleep(3);
+		v(0, buffer_addr[front].proc_sem_id);
 		front = (front + 1) % buffer_size;
 		v(0, mutex);
 		v(0, empty_id);
