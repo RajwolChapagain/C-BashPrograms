@@ -11,10 +11,13 @@
 #include <sys/sem.h>
 
 struct Process {
+	int id;
 	int pid;
 	int size;
 	int time;
 	int proc_sem_id;
+	int start_time;
+	int ram_address;
 };
 
 int main(int argc, char* argv[]) {
