@@ -8,15 +8,17 @@
 #include <string.h>
 #include <sys/shm.h>
 #include <sys/sem.h>
+#include <limits.h>
 
 struct Process {
-	int id;
+	char id;
 	int pid;
 	int size;
 	int time;
 	int proc_sem_id;
 	int start_time;
 	int ram_address;
+	int status;
 };
 
 int main(int argc, char* argv[]) {
@@ -65,8 +67,7 @@ int main(int argc, char* argv[]) {
 	int full_id = semget(IPC_PRIVATE, 1, 0700);
 	int mutex = semget(IPC_PRIVATE, 1, 0700);
 
-	// Initialize buffer front and rear
-	int front = 0;
+	// Initialize buffer rear
 	int* rear_addr = (int*) shmat(rear_id, NULL, SHM_RND);
 	*rear_addr = 0;	
 
@@ -84,33 +85,122 @@ int main(int argc, char* argv[]) {
 	*stop = 0;
 
 	struct Process* buffer_addr = (struct Process*) shmat(shm_id, NULL, SHM_RND);
-	// Print loop
-	while (!*stop) {
-		p(0, full_id);
-		if (*stop) break; // stop.c could've woken it up
-		p(0, mutex);
-		printf("A new process has just requested to be put into memory!\n");
-		printf("PID: %d\n", buffer_addr[front].pid);
-		printf("Size: %d\n", buffer_addr[front].size);
-		printf("Time: %d\n", buffer_addr[front].time);
-		printf("Proc Sem ID: %d\n", buffer_addr[front].proc_sem_id);
-		sleep(3);
-		v(0, buffer_addr[front].proc_sem_id);
-		front = (front + 1) % buffer_size;
-		v(0, mutex);
-		v(0, empty_id);
+
+	// Initialize shmem buffer
+	int l;
+	for (l = 0; l < buffer_size; l++) {
+		buffer_addr[l].status = INT_MAX;
 	}
 
-	// Clean up
-	shmctl(shm_id, IPC_RMID, NULL);
-	shmctl(stop_id, IPC_RMID, NULL);
-	shmctl(rear_id, IPC_RMID, NULL);
-	semctl(empty_id, 0, IPC_RMID, 0);
-	semctl(full_id, 0, IPC_RMID, 0);
-	semctl(mutex, 0, IPC_RMID, 0);
-	remove("sync_info.txt");
+	int orig_id = getpid();
+	if (fork() != 0) {  // Parent process responsible for receiving RAM requests
+		char id = 'A';
+		while (!*stop) {
+			p(0, full_id);
+			if (*stop) break; // stop.c could've woken it up
+			p(0, mutex);
+			buffer_addr[*rear_addr].id = id;
+			buffer_addr[*rear_addr].start_time = (int) time(NULL);
+			buffer_addr[*rear_addr].ram_address = -1;
+			buffer_addr[*rear_addr].status = 0;
+			id++;
+			id = (char) ('A' + ((id - 'A') % 26));
+			int i;
+			for (i = 0; i < buffer_size; i++)
+				if (buffer_addr[i].status != 0 && buffer_addr[i].status != 1)
+					break;
 
-	printf("Consumer shutting down.\n");
+			
+			*rear_addr = i;
+			v(0, mutex);
+		}
+	} else { // Child process responsible for placing processes into RAM
+			 // 	and displaying RAM status
+		
+		char ram[rows*cols];
+		char* ram_ptr = ram;
+		int i, j;
+		// Initialize ram with .
+		for (i = 0; i < rows; i++) {
+			for (j = 0; j < cols; j++) {
+				*ram_ptr = '.';
+				ram_ptr++;
+			}
+		}
+
+		while (!*stop) {
+			// Update RAM table by looking at every process in the buffer
+			for (i = 0; i < buffer_size; i++) {
+				if (buffer_addr[i].status == 1) {  // If a process is in RAM
+					if (buffer_addr[i].time <= 0) { // If a process has finished executing
+						buffer_addr[i].status = -1;
+						int counter;
+						for (counter = buffer_addr[i].ram_address; counter < buffer_addr[i].size; counter++)
+							ram[counter] = '.';
+
+						v(0, buffer_addr[i].proc_sem_id);
+						v(0, empty_id);
+					} else {  // If a process is still executing
+						buffer_addr[i].time--;
+					}
+				} else if (buffer_addr[i].status == 0) { // If a process is waiting to get into RAM
+					// Use first fit to place it in RAM
+					int index = 0, empty_len = 0;
+					for (; index < rows * cols; index++) {
+						if (ram[index] == '.') empty_len++;
+						else empty_len = 0;
+						if (buffer_addr[i].size == empty_len) break;
+					}
+
+					if (index != rows*cols) { // An empty slot was found
+						int empty_addr = index - empty_len + 1;
+						buffer_addr[i].ram_address = empty_addr;
+						for (; empty_addr < buffer_addr[i].size; empty_addr++)
+							ram[empty_addr] = buffer_addr[i].id;
+
+						buffer_addr[i].status = 1;
+					}
+				}
+			}
+			
+			// Display RAM table
+			printf("%-10s%-10s%-10s%-10s\n", "ID", "PID", "SIZE", "TIME");
+			for (i = 0; i < buffer_size; i++) {
+				if (buffer_addr[i].status == 0 || buffer_addr[i].status == 1)
+					printf("%-10c%-10d%-10d%-10d\n", buffer_addr[i].id, buffer_addr[i].pid, buffer_addr[i].size, buffer_addr[i].time);
+			}
+
+			printf("\nRAM Table:\n");
+			for (i = 0; i < cols; i++)
+				printf("-");
+			printf("\n");
+
+			int k = 0;
+			for (i = 0; i < rows; i++) {
+				for (j = 0; j < cols; j++) {
+					printf("%c", ram[k]);
+					k++;
+				}
+				printf("\n");
+			}
+			printf("\n\n");
+			sleep(1);
+		}
+	}
+
+	if (getpid() == orig_id) {
+		// Clean up
+		shmctl(shm_id, IPC_RMID, NULL);
+		shmctl(stop_id, IPC_RMID, NULL);
+		shmctl(rear_id, IPC_RMID, NULL);
+		semctl(empty_id, 0, IPC_RMID, 0);
+		semctl(full_id, 0, IPC_RMID, 0);
+		semctl(mutex, 0, IPC_RMID, 0);
+		remove("sync_info.txt");
+
+		printf("Consumer shutting down.\n");
+	}
+
 	return 0;
 }
 

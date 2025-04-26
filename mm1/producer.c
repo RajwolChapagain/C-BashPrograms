@@ -11,13 +11,14 @@
 #include <sys/sem.h>
 
 struct Process {
-	int id;
+	char id;
 	int pid;
 	int size;
 	int time;
 	int proc_sem_id;
 	int start_time;
 	int ram_address;
+	int status;
 };
 
 int main(int argc, char* argv[]) {
@@ -84,7 +85,6 @@ int main(int argc, char* argv[]) {
 	buffer_addr[*rear_addr].size = process.size;
 	buffer_addr[*rear_addr].time = process.time;
 	buffer_addr[*rear_addr].proc_sem_id = process.proc_sem_id;
-	*rear_addr = (*rear_addr + 1) % buffer_size;
 	v(0, mutex);
 	v(0, full_id);
 	
