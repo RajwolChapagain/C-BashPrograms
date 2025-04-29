@@ -184,11 +184,15 @@ int main(int argc, char* argv[]) {
 
 	if (getpid() == orig_id) {
 		int i;
-		// Wake all dormant producers up
+		// Signal all producers on the buffer
 		for (i = 0; i < buffer_size; i++) {
 			if (buffer_addr[i].status == 1 || buffer_addr[i].status == -1 || buffer_addr[i].status == 0)
 					v(0, buffer_addr[i].proc_sem_id);
 		}
+		
+		// Signal all producers not on the buffer
+		for (i = 0; i < semctl(empty_id, 0, GETNCNT); i++)
+			v(0, empty_id);
 
 		// Clean up
 		shmctl(shm_id, IPC_RMID, NULL);

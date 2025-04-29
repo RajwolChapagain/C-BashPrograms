@@ -77,30 +77,32 @@ int main(int argc, char* argv[]) {
 	// Attach to shared memory
 	struct Process* buffer_addr = (struct Process*) shmat(buffer_id, NULL, SHM_RND);
 	int* rear_addr = (int*) shmat(rear_id, NULL, SHM_RND);
+	int* stop = (int*) shmat(stop_id, NULL, SHM_RND);
 
 	printf("%d is requesting %d blocks of RAM for %d seconds\n", process.pid, size, time);
 	p(0, empty_id);
-	p(0, mutex);
-	int i;
-	for (i = 0; i < buffer_size; i++)
-		if (buffer_addr[i].status != 0 && buffer_addr[i].status != 1)
-			break;
+	if (!*stop) {
+		p(0, mutex);
+		int i;
+		for (i = 0; i < buffer_size; i++)
+			if (buffer_addr[i].status != 0 && buffer_addr[i].status != 1)
+				break;
 
-	*rear_addr = i;
+		*rear_addr = i;
 
-	buffer_addr[*rear_addr].pid = process.pid;
-	buffer_addr[*rear_addr].size = process.size;
-	buffer_addr[*rear_addr].time = process.time;
-	buffer_addr[*rear_addr].proc_sem_id = process.proc_sem_id;
-	v(0, mutex);
-	v(0, full_id);
-	
-	// Wait for process request to finish execution
-	p(0, proc_sem_id);
+		buffer_addr[*rear_addr].pid = process.pid;
+		buffer_addr[*rear_addr].size = process.size;
+		buffer_addr[*rear_addr].time = process.time;
+		buffer_addr[*rear_addr].proc_sem_id = process.proc_sem_id;
+		v(0, mutex);
+		v(0, full_id);
+		
+		// Wait for process request to finish execution
+		p(0, proc_sem_id);
 
-	int* stop = (int*) shmat(stop_id, NULL, SHM_RND);
-	if (!*stop)
-		printf("%d finished my request of %d blocks for %d seconds\n", process.pid, size, time);
+		if (!*stop)
+			printf("%d finished my request of %d blocks for %d seconds\n", process.pid, size, time);
+	}
 
 	// Clean up the waiting semaphore
 	semctl(proc_sem_id, 0, IPC_RMID, 0);
