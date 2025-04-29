@@ -98,7 +98,9 @@ int main(int argc, char* argv[]) {
 	// Wait for process request to finish execution
 	p(0, proc_sem_id);
 
-	printf("%d finished my request of %d blocks for %d seconds\n", process.pid, size, time);
+	int* stop = (int*) shmat(stop_id, NULL, SHM_RND);
+	if (!*stop)
+		printf("%d finished my request of %d blocks for %d seconds\n", process.pid, size, time);
 
 	// Clean up the waiting semaphore
 	semctl(proc_sem_id, 0, IPC_RMID, 0);
