@@ -147,10 +147,10 @@ int main(int argc, char* argv[]) {
 
 					if (index != rows*cols) { // An empty slot was found
 						int empty_addr = index - empty_len + 1;
-						printf("Empty slot found for process %c at address %d\n", buffer_addr[i].id, empty_addr);
 						buffer_addr[i].ram_address = empty_addr;
-						for (; empty_addr < buffer_addr[i].size; empty_addr++)
-							ram[empty_addr] = buffer_addr[i].id;
+						int current_index;
+						for (current_index = 0; current_index < buffer_addr[i].size; current_index++)
+							ram[empty_addr + current_index] = buffer_addr[i].id;
 
 						buffer_addr[i].status = 1;
 					}
