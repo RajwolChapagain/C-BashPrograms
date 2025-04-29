@@ -158,6 +158,7 @@ int main(int argc, char* argv[]) {
 			}
 			
 			// Display RAM table
+			printf("\e[1;1H\e[2J");
 			printf("%-10s%-10s%-10s%-10s\n", "ID", "PID", "SIZE", "TIME");
 			for (i = 0; i < buffer_size; i++) {
 				if (buffer_addr[i].status == 0 || buffer_addr[i].status == 1)
@@ -177,7 +178,6 @@ int main(int argc, char* argv[]) {
 				}
 				printf("\n");
 			}
-			printf("\n\n");
 			sleep(1);
 		}
 	}
