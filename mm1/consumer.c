@@ -128,8 +128,8 @@ int main(int argc, char* argv[]) {
 					if (buffer_addr[i].time <= 0) { // If a process has finished executing
 						buffer_addr[i].status = -1;
 						int counter;
-						for (counter = buffer_addr[i].ram_address; counter < buffer_addr[i].size; counter++)
-							ram[counter] = '.';
+						for (counter = 0; counter < buffer_addr[i].size; counter++)
+							ram[buffer_addr[i].ram_address + counter] = '.';
 
 						v(0, buffer_addr[i].proc_sem_id);
 						v(0, empty_id);
