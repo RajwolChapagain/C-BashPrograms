@@ -40,8 +40,8 @@ int main(int argc, char* argv[]) {
 	int size = atoi(argv[1]);
 	int time = atoi(argv[2]);
 
+	// Read sync information from file
 	int buffer_size, buffer_id, stop_id, empty_id, full_id, mutex, rear_id, rows, cols;
-
 	fscanf(fp, "%d", &buffer_size);
 	fscanf(fp, "%d", &buffer_id);
 	fscanf(fp, "%d", &stop_id);
@@ -84,12 +84,14 @@ int main(int argc, char* argv[]) {
 	if (!*stop) {
 		p(0, mutex);
 		int i;
+		// Find an empty slot in buffer
 		for (i = 0; i < buffer_size; i++)
 			if (buffer_addr[i].status != 0 && buffer_addr[i].status != 1)
 				break;
 
 		*rear_addr = i;
 
+		// Write process info to buffer
 		buffer_addr[*rear_addr].pid = process.pid;
 		buffer_addr[*rear_addr].size = process.size;
 		buffer_addr[*rear_addr].time = process.time;

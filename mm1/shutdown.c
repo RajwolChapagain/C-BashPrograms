@@ -18,14 +18,6 @@ int main() {
 		return 1;
 	}
 	
-	// sync_info.txt is expected to be formatted as follows:
-	// buffer_size (int) \n (char)
-	// buffer_id (int) \n (char)
-	// stop_id (int) \n (char)
-	// empty_id (int) \n (char)
-	// full_id (int) \n (char)
-	// mutex (int) \n (char)
-	
 	int stop_id;
 	int i;
 	for (i = 0; i < 3; i++) // Since stop_id is on the third line
@@ -39,12 +31,12 @@ int main() {
 
 	fclose(fp);
 
-	// Wake printer up in case it's blocked
+	// Wake consumer up in case it's blocked
 	v(0, full_id);
 
 	int* stop = (int* ) shmat(stop_id, NULL, SHM_RND);
 
-	// Set stop to 1, which should signal the print daemon to stop
+	// Set stop to 1, which should signal the consumer and all producers to stop
 	*stop = 1;
 
 	return 0;

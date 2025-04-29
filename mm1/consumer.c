@@ -99,6 +99,7 @@ int main(int argc, char* argv[]) {
 			p(0, full_id);
 			if (*stop) break; // stop.c could've woken it up
 			p(0, mutex);
+			// Endow process with id, start_time, and a status
 			buffer_addr[*rear_addr].id = id;
 			buffer_addr[*rear_addr].start_time = (int) time(NULL);
 			buffer_addr[*rear_addr].ram_address = -1;
@@ -128,9 +129,11 @@ int main(int argc, char* argv[]) {
 					if (buffer_addr[i].time <= 0) { // If a process has finished executing
 						buffer_addr[i].status = -1;
 						int counter;
+						// Clear RAM
 						for (counter = 0; counter < buffer_addr[i].size; counter++)
 							ram[buffer_addr[i].ram_address + counter] = '.';
 
+						// Signal the producer about completion
 						v(0, buffer_addr[i].proc_sem_id);
 						v(0, empty_id);
 					} else {  // If a process is still executing
@@ -149,6 +152,7 @@ int main(int argc, char* argv[]) {
 						int empty_addr = index - empty_len + 1;
 						buffer_addr[i].ram_address = empty_addr;
 						int current_index;
+						// Write the process id character to the appropriate blocks in RAM
 						for (current_index = 0; current_index < buffer_addr[i].size; current_index++)
 							ram[empty_addr + current_index] = buffer_addr[i].id;
 
@@ -157,7 +161,7 @@ int main(int argc, char* argv[]) {
 				}
 			}
 			
-			// Display RAM table
+			// Display RAM info
 			printf("\e[1;1H\e[2J");
 			printf("%-10s%-10s%-10s%-10s\n", "ID", "PID", "SIZE", "TIME");
 			for (i = 0; i < buffer_size; i++) {
