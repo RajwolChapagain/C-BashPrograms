@@ -16,6 +16,8 @@ sleep 3
 ./user &
 ./user &
 ./user &
-sleep 10
+sleep 4
 ./user &
 ./user &
+sleep 3
+./stop

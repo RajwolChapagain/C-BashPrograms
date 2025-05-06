@@ -1,8 +1,9 @@
 // Name:		Rajwol Chapagain
 // Class:		CSC 460
-// Assignment:	System Print Daemon - A program that simulates the producer/consumer synchronization problem using a printer shared by a group of users.
-// Date: 		04/14/2025
-// A Stop file for the print daemon program that signals the printer to shut down
+// Assignment:	Memory Manager - A program that simulates a memory management system that takes in requests from processes wanting to be put into RAM, 
+// 				places them using the first fit algorithm for contiguous memory allocation, and simulates executing them.
+// Date: 		04/24/2025
+// A Shutdown file for the memory manager program that signals the consumer and producer processes to shut down operations
 
 #include <stdio.h>
 #include <sys/shm.h>
@@ -17,14 +18,6 @@ int main() {
 		return 1;
 	}
 	
-	// sync_info.txt is expected to be formatted as follows:
-	// buffer_size (int) \n (char)
-	// buffer_id (int) \n (char)
-	// stop_id (int) \n (char)
-	// empty_id (int) \n (char)
-	// full_id (int) \n (char)
-	// mutex (int) \n (char)
-	
 	int stop_id;
 	int i;
 	for (i = 0; i < 3; i++) // Since stop_id is on the third line
@@ -38,12 +31,12 @@ int main() {
 
 	fclose(fp);
 
-	// Wake printer up in case it's blocked
+	// Wake consumer up in case it's blocked
 	v(0, full_id);
 
 	int* stop = (int* ) shmat(stop_id, NULL, SHM_RND);
 
-	// Set stop to 1, which should signal the print daemon to stop
+	// Set stop to 1, which should signal the consumer and all producers to stop
 	*stop = 1;
 
 	return 0;

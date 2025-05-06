@@ -1,3 +1,7 @@
+// Name:		Rajwol Chapagain
+// Class:		CSC 460
+// Assignment:	System Print Daemon - A program that simulates the producer/consumer synchronization problem using a printer shared by a group of users.
+// Date: 		04/14/2025
 // User code for the print daemon program that simulates a user submitting print jobs
 
 #include <stdio.h>
@@ -32,11 +36,11 @@ int main() {
 	print_job.owner_id = pid;
 	sprintf(print_job.filename, "quotefile_%d", pid);
 
-	int buffer_size, buffer_id, _stop_id, empty_id, full_id, mutex, rear_id;
+	int buffer_size, buffer_id, stop_id, empty_id, full_id, mutex, rear_id;
 
 	fscanf(fp, "%d", &buffer_size);
 	fscanf(fp, "%d", &buffer_id);
-	fscanf(fp, "%d", &_stop_id);
+	fscanf(fp, "%d", &stop_id);
 	fscanf(fp, "%d", &empty_id);
 	fscanf(fp, "%d", &full_id);
 	fscanf(fp, "%d", &mutex);
@@ -46,6 +50,7 @@ int main() {
 	// Attach to shared memory
 	struct Job* buffer_addr = (struct Job*) shmat(buffer_id, NULL, SHM_RND);
 	int* rear_addr = (int*) shmat(rear_id, NULL, SHM_RND);
+	int* stop = (int*) shmat(stop_id, NULL, SHM_RND);
 
 	int i, sleep_duration;
 	srand(pid);
@@ -54,6 +59,7 @@ int main() {
 		sleep_duration = (rand() % 4) + 2;
 		printf("User %d is working for %d seconds\n", pid, sleep_duration);
 		sleep(sleep_duration);
+		if (*stop) break;
 		printf("User %d is printing %s\n", pid, print_job.filename);
 		p(0, empty_id);
 		p(0, mutex);
